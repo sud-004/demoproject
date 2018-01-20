@@ -10,8 +10,9 @@ import java.util.Objects;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -26,19 +27,23 @@ public class userServiceImpl implements userService {
 	@Autowired
 	private userRepository userRepository;
 
+	public static final Logger LOG = LoggerFactory.getLogger(userServiceImpl.class);;
+
 	@Override
 	public User createUser(User user) {
-		System.err.println("user data..." + user);
 		if (!user.validate()) {
 			throw new UserException("Please fill all details");
+
 		}
 		try {
 			userRepository.save(user);
 			return user;
 		} catch (DataIntegrityViolationException e) {
+			LOG.info(e.getMessage());
 			throw new UserException("unable to save User as data entered is not valid");
 		} catch (Exception e) {
 			e.printStackTrace();
+			LOG.info(e.getMessage());
 			throw new UserException("unable to save User");
 		}
 
@@ -46,7 +51,6 @@ public class userServiceImpl implements userService {
 
 	@Override
 	public Boolean authenticateLogin(String email, String password) {
-		System.err.println("Params..." + email + "...." + password);
 		Objects.requireNonNull(email);
 		Objects.requireNonNull(password);
 		String user = userRepository.findByEmailAndPassword(email, password);
@@ -59,13 +63,10 @@ public class userServiceImpl implements userService {
 
 	@Override
 	public List<User> getusersByName(String name) {
-		System.err.println("Params..." + name);
 		if (name == null)
 			throw new UserException("name cannot be Empty");
 		List<User> users = userRepository.findByName(name);
-		System.err.println("users data...." + userRepository.findByName(name));
 		if (users != null && !users.isEmpty()) {
-			System.err.println("inside return..." + users);
 			return users;
 		} else
 			throw new UserException("Users with the name " + name + " not found");
@@ -73,7 +74,6 @@ public class userServiceImpl implements userService {
 
 	@Override
 	public Response uploadUserPic(InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
-		System.err.println("inside upload service");
 		if (uploadedInputStream != null && fileDetail != null) {
 			byte[] buffer = new byte[10000];
 			int bytesRead;
@@ -86,6 +86,7 @@ public class userServiceImpl implements userService {
 				return Response.status(Status.ACCEPTED).build();
 			} catch (IOException e) {
 				e.printStackTrace();
+				LOG.info(e.getMessage());
 				throw new UserException("File not uploaded");
 			}
 		} else {
@@ -97,7 +98,6 @@ public class userServiceImpl implements userService {
 	@Override
 	public Response uploadWithPic(InputStream uploadedInputStream, FormDataContentDisposition fileDetail,
 			User userData) {
-		System.err.println("insude create service");
 		if (uploadedInputStream != null && fileDetail != null) {
 			if (!userData.validate()) {
 				throw new UserException("Please fill all details");
@@ -116,13 +116,16 @@ public class userServiceImpl implements userService {
 				try {
 					userRepository.save(userData);
 				} catch (DataIntegrityViolationException e) {
+					LOG.info(e.getMessage());
 					throw new UserException("unable to save User as data entered is not valid");
 				} catch (Exception e) {
+					LOG.info(e.getMessage());
 					e.printStackTrace();
 					throw new UserException("unable to save User");
 				}
 				return Response.status(Status.ACCEPTED).build();
 			} catch (IOException e) {
+				LOG.info(e.getMessage());
 				e.printStackTrace();
 				throw new UserException("user not created");
 			}

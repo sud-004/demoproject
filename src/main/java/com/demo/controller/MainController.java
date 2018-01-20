@@ -28,16 +28,6 @@ public class MainController {
 	@Autowired
 	private userService userService;
 
-	// @GET
-	// public User getUser(@QueryParam("userid") String userId) {
-	// System.err.println("hi");
-	// User user = new User();
-	// user.setEmail("sud2@abc");
-	// user.setName("sudhanva2");
-	// user.setPassword("sud2");
-	// return userService.createUser(user);
-	// }
-
 	@GET
 	@Path("getusers")
 	public List<User> getusersByName(@QueryParam("name") String name) {
@@ -53,7 +43,6 @@ public class MainController {
 	@GET
 	@Path("login")
 	public Boolean authenticateLogin(@QueryParam("email") String email, @QueryParam("password") String password) {
-		System.err.println("inside login service");
 		return userService.authenticateLogin(email, password);
 	}
 
@@ -62,8 +51,6 @@ public class MainController {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadUserPic(@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail, @FormDataParam("userdata") User userData) {
-
-		System.err.println("userData..." + userData);
 
 		return userService.uploadUserPic(uploadedInputStream, fileDetail);
 
