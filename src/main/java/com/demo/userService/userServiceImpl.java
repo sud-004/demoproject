@@ -5,8 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -99,6 +101,10 @@ public class userServiceImpl implements userService {
 	public Response uploadWithPic(InputStream uploadedInputStream, FormDataContentDisposition fileDetail,
 			User userData) {
 		if (uploadedInputStream != null && fileDetail != null) {
+
+			if (!getFileExtension(fileDetail.getFileName()).equals("jpeg")) {
+				throw new UserException("Please select only jpeg extension image files");
+			}
 			if (!userData.validate()) {
 				throw new UserException("Please fill all details");
 			}
@@ -132,6 +138,25 @@ public class userServiceImpl implements userService {
 
 		} else
 			throw new UserException("please select a image file");
+
+	}
+
+	private String getFileExtension(String fileName) {
+		int index = 0;
+		while (index <= fileName.length()) {
+
+			char singleChar = fileName.charAt(index);
+			if (singleChar == '.') {
+				break;
+			}
+			index++;
+		}
+		if (index != fileName.length()) {
+			String extension = fileName.substring(index + 1);
+			return extension;
+		} else {
+			throw new UserException("File Extension not found");
+		}
 
 	}
 
